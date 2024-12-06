@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Practice with Letter Highlighting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eaeaea;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #007BFF;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #paragraphInput {
+            min-height: 150px;
+        }
+
+        #textDisplay, #inputArea {
+            min-height: 150px;
+            background-color: #f7f9fc;
+            border-radius: 4px;
+            color: #333;
+            box-sizing: border-box;
+            font-size: 30px;
+        }
+
+        #textDisplay {
+            border: 5px solid black;
+        }
+
+        #inputArea {
+            border: 5px solid black;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #timer {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .highlight {
+            color: gray;
+        }
+
+        .incorrect {
+            color: green;
+            text-decoration: underline;
+        }
+
+        .upcoming {
+            color: red;
+            text-decoration: underline;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f7f9fc;
+            border-radius: 4px;
+        }
+
+        .outputSection {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            display: none;
+            margin-top: 20px;
+        }
+
+        .outputSection p {
+            margin: 10px 0;
+            font-size: 26px;
+        }
+
+        .hiddenParagraphs {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .hiddenParagraphs pre {
+            background-color: #f7f9fc;
+            border: 3px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 16px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <h1>Typing Practice with Letter Highlighting</h1>
+
+    <div id="paragraphInputSection">
+        <h2>Enter Your Paragraph</h2>
+        <textarea id="paragraphInput" placeholder="Paste your paragraph here..."></textarea>
+        <div class="controls">
+            <button id="loadParagraphBtn">Load Paragraph</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <label for="timeSelect">Select Time Limit: </label>
+        <select id="timeSelect">
+            <option value="1">1 Minute</option>
+            <option value="2">2 Minutes</option>
+            <option value="5">5 Minutes</option>
+            <option value="10">10 Minutes</option>
+            <option value="15">15 Minutes</option>
+        </select>
+    </div>
+    
+    <div id="originalParagraphSection">
+        <h2>Original Paragraph</h2>
+        <div id="textDisplay"></div>
+    </div>
+    
+    <div id="typingAreaSection">
+        <div id="timer">Time Left: 00:00.000</div>
+        <textarea id="inputArea" placeholder="Start typing here..." disabled></textarea>
+    </div>
+
+    <div class="controls">
+        <button id="submitBtn">Submit</button>
+        <button id="restartBtn">Restart</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resumeBtn" style="display: none;">Resume</button>
+        <button id="quitBtn">Quit</button>
+    </div>
+
+    <div id="statsSection" class="stats">
+        <div id="wordCount">Words Typed: 0</div>
+        <div id="speed">Speed: 0 WPM</div>
+        <div id="accuracy">Accuracy: 0%</    </div>
+    </div>
+
+    <div class="outputSection" id="results">
+        <h2>Results:</h2>
+        <p id="totalWords">Total Words: </p>
+        <p id="correctWords">Correct Words: </p>
+        <p id="incorrectWords">Incorrect Words: </p>
+        <p id="finalSpeed">Final Speed: </p>
+        <p id="finalAccuracy">Accuracy: </p>
+    </div>
+
+    <div class="hiddenParagraphs" id="hiddenParagraphs">
+        <h2>Previous Paragraphs</h2>
+        <div class="radio-group">
+            <label><input type="radio" name="paragraphChoice" value="first" /> First Paragraph</label>
+            <label><input type="radio" name="paragraphChoice" value="second" /> Second Paragraph</label>
+            <label><input type="radio" name="paragraphChoice" value="both" /> Both Paragraphs</label>
+        </div>
+        <div class="controls">
+            <button id="reuseSelectedBtn">Reuse Selected</button>
+        </div>
+        <pre id="lastParagraph"></pre>
+        <pre id="secondLastParagraph"></pre>
+    </div>
+</div>
+
+<script>
+    let inputArea = document.getElementById('inputArea');
+    let textDisplay = document.getElementById('textDisplay');
+    let paragraphInput = document.getElementById('paragraphInput');
+    let loadParagraphBtn = document.getElementById('loadParagraphBtn');
+    let reuseSelectedBtn = document.getElementById('reuseSelectedBtn');
+    let timerDisplay = document.getElementById('timer');
+    let timeSelect = document.getElementById('timeSelect');
+    let typingStarted = false;
+    let timerInterval;
+    let timeLeft;
+    let startTime;
+    let elapsedTime = 0;  // Track the total elapsed time
+    let pausedAt = 0;
+    let isPaused = false;
+
+    let originalText = '';
+    let previousParagraphs = [];
+    let originalWords = [];
+    let typedWords = [];
+    let correctWords = 0;
+    let incorrectWords = 0;
+    let totalTypedWords = 0;
+
+    // Load the paragraph and enable input area
+    loadParagraphBtn.addEventListener('click', () => {
+        const paragraph = paragraphInput.value.trim();
+        if (paragraph) {
+            if (previousParagraphs.length >= 2) {
+                previousParagraphs.shift(); // Remove the oldest paragraph if there are already two
+            }
+            previousParagraphs.push(paragraph);
+
+            originalText = paragraph;
+            originalWords = paragraph.split(/\s+/);
+            typedWords = [];
+            correctWords = 0;
+            incorrectWords = 0;
+            totalTypedWords = 0;
+            displayTextWithHighlights(); 
+            inputArea.disabled = false; 
+            inputArea.focus(); 
+
+            updateHiddenParagraphs();
+        } else {
+            alert('Please enter a paragraph.');
+        }
+    });
+
+    // Reuse the selected paragraphs
+    reuseSelectedBtn.addEventListener('click', () => {
+        const choice = document.querySelector('input[name="paragraphChoice"]:checked').value;
+        let newParagraph = '';
+
+        if (choice === 'first') {
+            newParagraph = previousParagraphs.length > 0 ? previousParagraphs[previousParagraphs.length - 1] : '';
+        } else if (choice === 'second') {
+            newParagraph = previousParagraphs.length > 1 ? previousParagraphs[previousParagraphs.length - 2] : '';
+        } else if (choice === 'both') {
+            newParagraph = previousParagraphs.join(' ');
+        }
+
+        paragraphInput.value = newParagraph;
+    });
+
+    function updateHiddenParagraphs() {
+        const lastParagraph = previousParagraphs.length > 0 ? previousParagraphs[previousParagraphs.length - 1] : '';
+        const secondLastParagraph = previousParagraphs.length > 1 ? previousParagraphs[previousParagraphs.length - 2] : '';
+
+        document.getElementById('lastParagraph').textContent = lastParagraph;
+        document.getElementById('secondLastParagraph').textContent = secondLastParagraph;
+    }
+
+    function startTimer() {
+        const selectedTime = parseInt(timeSelect.value) * 60 * 1000;
+        timeLeft = selectedTime - elapsedTime;
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            if (!isPaused) {
+                const now = Date.now();
+                elapsedTime = now - startTime + pausedAt;
+                timeLeft = selectedTime - elapsedTime;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "Time's up!";
+                    submitResults();
+                } else {
+                    timerDisplay.textContent = formatTime(timeLeft);
+                }
+            }
+        }, 10);
+    }
+
+    function formatTime(milliseconds) {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const ms = milliseconds % 1000;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+    }
+
+    inputArea.addEventListener('input', () => {
+        if (!typingStarted) {
+            startTimer();
+            typingStarted = true;
+        }
+        const typedText = inputArea.value.trim();
+        typedWords = typedText.split(/\s+/);
+
+        totalTypedWords = typedWords.length;
+        correctWords = 0;
+        incorrectWords = 0;
+
+        for (let i = 0; i < typedWords.length; i++) {
+            if (typedWords[i] === originalWords[i]) {
+                correctWords++;
+            } else {
+                incorrectWords++;
+            }
+        }
+        updateStats();
+        displayTextWithHighlights();
+    });
+
+    function updateStats() {
+        const accuracy = totalTypedWords > 0 ? (correctWords / totalTypedWords) * 100 : 0;
+        const elapsedTimeInMinutes = elapsedTime / 1000 / 60; // in minutes
+        const speed = Math.round(correctWords / elapsedTimeInMinutes); // Words per minute
+
+        document.getElementById('wordCount').textContent = `Words Typed: ${totalTypedWords}`;
+        document.getElementById('speed').textContent = `Speed: ${speed} WPM`;
+        document.getElementById('accuracy').textContent = `Accuracy: ${accuracy.toFixed(2)}%`;
+    }
+
+    function displayTextWithHighlights() {
+        let displayHTML = '';
+        const typedText = inputArea.value.trim();
+        const typedWords = typedText.split(/\s+/);
+
+        for (let i = 0; i < originalWords.length; i++) {
+            let wordClass = 'highlight';
+            if (i < typedWords.length) {
+                if (typedWords[i] === originalWords[i]) {
+                    wordClass = 'correct';
+                } else {
+                    wordClass = 'incorrect';
+                }
+            } else {
+                wordClass = 'upcoming';
+            }
+            displayHTML += `<span class="${wordClass}">${originalWords[i]}</span> `;
+        }
+
+        textDisplay.innerHTML = displayHTML.trim();
+    }
+
+    function submitResults() {
+        inputArea.disabled = true;
+        clearInterval(timerInterval);
+
+        const accuracy = totalTypedWords > 0 ? (correctWords / totalTypedWords) * 100 : 0;
+        const elapsedTimeInMinutes = elapsedTime / 1000 / 60; // in minutes
+        const speed = Math.round(correctWords / elapsedTimeInMinutes); // Words per minute
+
+        document.getElementById('totalWords').textContent = `Total Words: ${totalTypedWords}`;
+        document.getElementById('correctWords').textContent = `Correct Words: ${correctWords}`;
+        document.getElementById('incorrectWords').textContent = `Incorrect Words: ${incorrectWords}`;
+        document.getElementById('finalSpeed').textContent = `Final Speed: ${speed} WPM`;
+        document.getElementById('finalAccuracy').textContent = `Accuracy: ${accuracy.toFixed(2)}%`;
+
+        document.getElementById('results').style.display = 'block';
+    }
+
+    // Pause button logic
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+        if (typingStarted && !isPaused) { // Only allow pause if typing has started and is not already paused
+            isPaused = true; // Set paused state
+            pausedAt = elapsedTime; // Store elapsed time
+            clearInterval(timerInterval); // Stop the timer
+            inputArea.disabled = true; // Disable typing
+            document.getElementById('pauseBtn').style.display = 'none'; // Hide pause button
+            document.getElementById('resumeBtn').style.display = 'inline'; // Show resume button
+        }
+    });
+
+    // Resume button logic
+    document.getElementById('resumeBtn').addEventListener('click', () => {
+        if (isPaused) { // Only allow resume if currently paused
+            isPaused = false; // Clear paused state
+            startTimer(); // Restart the timer
+            inputArea.disabled = false; // Enable typing
+            document.getElementById('resumeBtn').style.display = 'none'; // Hide resume button
+            document.getElementById('pauseBtn').style.display = 'inline'; // Show pause button
+        }
+    });
+
+    // Restart button logic
+    document.getElementById('restartBtn').addEventListener('click', () => {
+        clearInterval(timerInterval);
+        inputArea.value = '';
+        document.getElementById('statsSection').reset();
+        inputArea.disabled = false;
+        typingStarted = false;
+        isPaused = false;
+        elapsedTime = 0;
+        timeLeft = parseInt(timeSelect.value) * 60 * 1000;
+        timerDisplay.textContent = `Time Left: ${formatTime(timeLeft)}`;
+    });
+
+    // Quit button logic
+    document.getElementById('quitBtn').addEventListener('click', () => {
+        clearInterval(timerInterval);
+        inputArea.disabled = true;
+        alert('You quit the session!');
+    });
+
+</script>
+</body>
+</html>
